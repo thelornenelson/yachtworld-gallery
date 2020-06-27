@@ -8,7 +8,7 @@ import galleryMarkup from './components/gallery.html';
 // Photoswipe
 
 import PhotoSwipe from 'photoswipe';
-import PhotoSwipeUI_Default from 'photoswipe/src/js/ui/photoswipe-ui-default';
+import PhotoSwipeUI from './components/photoswipe-ui';
 
 import imageProbeFetch from './components/imageProbeFetch';
 
@@ -17,8 +17,7 @@ document.body.insertAdjacentHTML('beforeend', launcherMarkup);
 document.body.insertAdjacentHTML('beforeend', galleryMarkup);
 
 const launchButton = document.querySelector('[data-ywzg-gallery-open]');
-// const galleryCloseButton = document.querySelector('[data-ywzg-gallery-close]');
-// const galleryEl = document.querySelector('[data-ywzg-gallery]');
+const zoomControl = document.querySelector('#pswp__zoom');
 
 const getImageUrls = () => {
   return new Promise(resolve => {
@@ -49,21 +48,34 @@ const main = async () => {
 
   const pswpElement = document.querySelector('.pswp');
 
-  // define options (if needed)
   const options = {
-      // optionName: 'option value'
-      // for example:
-      bgOpacity: 0.9,
-      index: 0, // start at first slide
-      clickToCloseNonZoomable: false,
-      history: false,
-      closeOnVerticalDrag: false,
-      closeOnScroll: false,
-      pinchToClose: false,
+    bgOpacity: 0.9,
+    index: 0, // start at first slide
+    clickToCloseNonZoomable: false,
+    history: false,
+    closeOnVerticalDrag: false,
+    closeOnScroll: false,
+    pinchToClose: false,
+    getDoubleTapZoom: (isMouseClick, item) =>  Math.min(1, item.initialZoomLevel * 2),
+    isClickableElement: el => el.tagName === 'A' || el.classList.contains('pswp__zoom'),
   };
 
+  zoomControl.addEventListener('mousedown', e => e.stopPropagation());
+
   launchButton.addEventListener('click', () => {
-    const gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options);
+    const gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI, items, options);
+
+    const onZoomChange = e => {
+      const zoomLevel = parseInt(e.target.value, 10);
+      const { initialZoomLevel } = gallery.currItem;
+      const targetZoomLevel = initialZoomLevel + (zoomLevel / 10) * (1 - initialZoomLevel);
+      gallery.zoomTo(targetZoomLevel, { x: gallery.viewportSize.x / 2, y: gallery.viewportSize.y / 2 }, 333);
+    }
+
+    zoomControl.addEventListener('change', onZoomChange);
+
+    gallery.listen('afterChange', () => { zoomControl.value = 0; });
+    gallery.listen('destroy', () => zoomControl.removeEventListener('change', onZoomChange));
 
     if (gallery.options.mouseUsed) {
       gallery.options.closeOnVerticalDrag = false;
@@ -73,8 +85,11 @@ const main = async () => {
       });
     }
 
+    zoomControl.value = 0;
     gallery.init();
   });
+
+  launchButton.disabled = false;
 };
 
 main();
