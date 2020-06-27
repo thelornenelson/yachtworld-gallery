@@ -17,7 +17,6 @@ document.body.insertAdjacentHTML('beforeend', launcherMarkup);
 document.body.insertAdjacentHTML('beforeend', galleryMarkup);
 
 const launchButton = document.querySelector('[data-ywzg-gallery-open]');
-const zoomControl = document.querySelector('#pswp__zoom');
 
 const getImageUrls = () => {
   return new Promise(resolve => {
@@ -58,24 +57,13 @@ const main = async () => {
     pinchToClose: false,
     getDoubleTapZoom: (isMouseClick, item) =>  Math.min(1, item.initialZoomLevel * 2),
     isClickableElement: el => el.tagName === 'A' || el.classList.contains('pswp__zoom'),
+    closeElClasses: [],
   };
-
-  zoomControl.addEventListener('mousedown', e => e.stopPropagation());
 
   launchButton.addEventListener('click', () => {
     const gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI, items, options);
 
-    const onZoomChange = e => {
-      const zoomLevel = parseInt(e.target.value, 10);
-      const { initialZoomLevel } = gallery.currItem;
-      const targetZoomLevel = initialZoomLevel + (zoomLevel / 10) * (1 - initialZoomLevel);
-      gallery.zoomTo(targetZoomLevel, { x: gallery.viewportSize.x / 2, y: gallery.viewportSize.y / 2 }, 333);
-    }
-
-    zoomControl.addEventListener('change', onZoomChange);
-
-    gallery.listen('afterChange', () => { zoomControl.value = 0; });
-    gallery.listen('destroy', () => zoomControl.removeEventListener('change', onZoomChange));
+    gallery.listen('afterChange', () => { options.index = gallery.getCurrentIndex(); });
 
     if (gallery.options.mouseUsed) {
       gallery.options.closeOnVerticalDrag = false;
@@ -85,7 +73,6 @@ const main = async () => {
       });
     }
 
-    zoomControl.value = 0;
     gallery.init();
   });
 

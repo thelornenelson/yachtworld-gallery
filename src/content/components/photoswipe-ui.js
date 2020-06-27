@@ -29,7 +29,8 @@ var PhotoSwipeUI =
 		_captionContainer,
 		_fakeCaptionContainer,
 		_indexIndicator,
-		_shareButton,
+    _shareButton,
+    _zoomSlider,
 		_shareModal,
 		_shareModalHidden = true,
 		_initalCloseOnScrollValue,
@@ -447,7 +448,20 @@ var PhotoSwipeUI =
 		{
 			name: 'button--zoom',
 			option: 'zoomEl',
-			onTap: pswp.toggleDesktopZoom
+			onTap: () => {
+        const { currItem, template } = pswp;
+        if (template.classList.contains('pswp--zoomed-in')) {
+          // Return to initial zoom and sync slider
+          _zoomSlider.value = 0;
+          pswp.zoomTo(currItem.initialZoomLevel, { x: pswp.viewportSize.x / 2, y: pswp.viewportSize.y / 2 }, 333);
+          template.classList.remove('pswp--zoomed-in');
+        } else {
+          // zoom to doubleTapZoomLevel and sync slider
+          const doubleTapZoomLevel = _options.getDoubleTapZoom(true, currItem);
+          _zoomSlider.value = (doubleTapZoomLevel - currItem.initialZoomLevel / (1 - currItem.initialZoomLevel)) * 10;
+          pswp.toggleDesktopZoom();
+        }
+      },
 		},
 		{
 			name: 'counter',
@@ -555,11 +569,25 @@ var PhotoSwipeUI =
 		_options = pswp.options;
 
 		// find pswp__ui element
-		_controls = framework.getChildByClass(pswp.scrollWrap, 'pswp__ui');
+    _controls = framework.getChildByClass(pswp.scrollWrap, 'pswp__ui');
+
+    _zoomSlider = _controls.querySelector('#pswp__zoom');
 
 		// create local link
-		_listen = pswp.listen;
+    _listen = pswp.listen;
 
+    const onZoomSliderChange = e => {
+      const zoomLevel = parseInt(e.target.value, 10);
+      const { initialZoomLevel } = pswp.currItem;
+      const targetZoomLevel = initialZoomLevel + (zoomLevel / 10) * (1 - initialZoomLevel);
+      pswp.zoomTo(targetZoomLevel, { x: pswp.viewportSize.x / 2, y: pswp.viewportSize.y / 2 }, 333);
+
+      if (zoomLevel === 0) {
+        pswp.template.classList.remove('pswp--zoomed-in');
+      } else {
+        pswp.template.classList.add('pswp--zoomed-in');
+      }
+    }
 
 		_setupHidingControlsDuringGestures();
 
@@ -589,12 +617,15 @@ var PhotoSwipeUI =
 			) {
 				preventObj.prevent = false;
 			}
-		});
+    });
 
 		// bind events for UI
 		_listen('bindEvents', function() {
 			framework.bind(_controls, 'pswpTap click', _onControlsTap);
-			framework.bind(pswp.scrollWrap, 'pswpTap', ui.onGlobalTap);
+      framework.bind(pswp.scrollWrap, 'pswpTap', ui.onGlobalTap);
+      framework.bind(_zoomSlider, 'change', onZoomSliderChange);
+
+      _listen('afterChange', () => { _zoomSlider.value = 0; });
 
 			if(!pswp.likelyTouchDevice) {
 				framework.bind(pswp.scrollWrap, 'mouseover', ui.onMouseOver);
@@ -614,7 +645,8 @@ var PhotoSwipeUI =
 			framework.unbind(document, 'mousemove', _onIdleMouseMove);
 			framework.unbind(_controls, 'pswpTap click', _onControlsTap);
 			framework.unbind(pswp.scrollWrap, 'pswpTap', ui.onGlobalTap);
-			framework.unbind(pswp.scrollWrap, 'mouseover', ui.onMouseOver);
+      framework.unbind(pswp.scrollWrap, 'mouseover', ui.onMouseOver);
+      framework.unbind(_zoomSlider, 'change', onZoomSliderChange);
 
 			if(_fullscrenAPI) {
 				framework.unbind(document, _fullscrenAPI.eventK, ui.updateFullscreen);
