@@ -1,0 +1,42 @@
+@import 'photoswipe-main.scss';
+@import 'photoswipe-default-skin.scss';
+
+.ywzg-launcher {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 100px;
+  height: 100px;
+  border-radius: 5px;
+  background: #dddddd;
+  box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.26);
+}
+
+.ywzg-gallery {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background: #230d50;
+  color: white;
+  z-index: 600000;
+}
+
+[data-ywzg-gallery="closed"] {
+  display: none;
+}
+
+.ywzg-gallery__close {
+  position: absolute;
+  top: 50px;
+  right: 50px;
+}
+
+.ywzg-gallery--hidden {
+  display: none;
+
+  .test {
+    color: blue;
+  }
+}
