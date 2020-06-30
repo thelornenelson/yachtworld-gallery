@@ -11,13 +11,14 @@ export default function imageProbeFetch(url) {
   .then(response => response.body)
   .then(body => {
     const reader = body.getReader();
-    let result;
+    let result = null;
     let size;
 
     return reader.read()
       .then(function process({ done, value }) {
         if (done) return;
-        if (result) {
+
+        if (result !== null) {
           result = Buffer.concat(result, Buffer.from(value));
         } else {
           result = Buffer.from(value);

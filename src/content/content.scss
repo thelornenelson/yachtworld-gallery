@@ -5,11 +5,56 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 100px;
-  height: 100px;
-  border-radius: 5px;
-  background: #dddddd;
   box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.26);
+  border-radius: 50%;
+}
+
+.ywzg-button {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  border: 0;
+  color: #E91E63;
+  background: #E91E63;
+  transition: transform 150ms ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &[disabled] {
+    cursor: wait;
+
+    .ywzg-button__launch-icon {
+      display: none;
+    }
+  }
+
+  &:not([disabled]) {
+    .ywzg-button__loading-icon {
+      display: none;
+    }
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.ywzg-button__loading-icon {
+  animation: 1.35s cubic-bezier(0.46, 0.19, 0.48, 0.53) reverse infinite spin;
+  width: 65%;
+}
+
+.ywzg-button__launch-icon {
+  width: 50%;
 }
 
 .ywzg-gallery {

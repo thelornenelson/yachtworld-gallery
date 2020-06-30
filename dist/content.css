@@ -671,11 +671,6 @@ a.pswp__share--download:hover {
 }
 
 /* pswp__ui--fit class is added when main image "fits" between top bar and bottom bar (caption) */
-.pswp__ui--fit .pswp__top-bar,
-.pswp__ui--fit .pswp__caption {
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
 /* pswp__ui--idle class is added when mouse isn't moving for several seconds (JS option timeToIdle) */
 .pswp__ui--idle .pswp__top-bar {
   opacity: 0;
@@ -716,11 +711,48 @@ a.pswp__share--download:hover {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 100px;
-  height: 100px;
-  border-radius: 5px;
-  background: #dddddd;
   box-shadow: 5px 5px 10px 0px rgba(0, 0, 0, 0.26);
+  border-radius: 50%;
+}
+
+.ywzg-button {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  border: 0;
+  color: #E91E63;
+  background: #E91E63;
+  transition: transform 150ms ease-in-out;
+  cursor: pointer;
+}
+.ywzg-button:hover {
+  transform: scale(1.1);
+}
+.ywzg-button[disabled] {
+  cursor: wait;
+}
+.ywzg-button[disabled] .ywzg-button__launch-icon {
+  display: none;
+}
+.ywzg-button:not([disabled]) .ywzg-button__loading-icon {
+  display: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.ywzg-button__loading-icon {
+  animation: 1.35s cubic-bezier(0.46, 0.19, 0.48, 0.53) reverse infinite spin;
+  width: 65%;
+}
+
+.ywzg-button__launch-icon {
+  width: 50%;
 }
 
 .ywzg-gallery {
