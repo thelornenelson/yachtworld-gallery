@@ -6,6 +6,7 @@ require('dotenv').config();
 
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
+  devtool: process.env.NODE_ENV === 'production' ? null : 'inline-source-map',
   entry: {
     content: './src/content/content.js',
     background: './src/background/background.js',

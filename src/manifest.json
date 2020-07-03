@@ -2,7 +2,7 @@
   "name": "Yacht Zoom Gallery",
   "version": "1.0",
   "description": "Provides a superior gallery experience for a popular yacht listing website",
-  "permissions": ["activeTab"],
+  "permissions": ["activeTab", "downloads", "pageCapture"],
   "content_scripts": [
     {
       "matches": ["https://*.yachtworld.com/boats/*"],
@@ -10,6 +10,10 @@
       "js": ["content.js"]
     }
   ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
   "options_page": "options.html",
   "page_action": {
     "default_popup": "popup.html",
