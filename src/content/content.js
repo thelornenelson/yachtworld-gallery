@@ -31,7 +31,7 @@ const getImageUrls = () => {
 
       console.log(`Waiting on ${nullOriginCount} thumbnail urls to load`);
 
-      if (nullOriginCount === 0) {
+      if (thumbnails.length && nullOriginCount === 0) {
           clearInterval(interval);
           resolve(urls.map(url => `${url.origin}${url.pathname}`));
         }
@@ -41,7 +41,7 @@ const getImageUrls = () => {
       //   clearInterval(interval);
       //   resolve(validUrls.map(url => `${url.origin}${url.pathname}`));
       // }
-    }, 250);
+    }, 500);
   })
 };
 
@@ -101,9 +101,15 @@ const main = async () => {
   downloadButton.addEventListener('click', () => {
     if (!gallery) return;
     gallery.listen('destroy', () => {
+      // Show details and specs at once so it is all captured
       const info = document.querySelectorAll('.boatdetails, .fullspecs');
       const displayState = [...info].map(el => el.style.display);
       info.forEach(el => el.style.display = 'block');
+
+      // Hide extension elements because injected stylesheets
+      // are not included in page capture
+      const extensionUI = document.querySelectorAll('.pswp, .yqzg-launcher');
+      extensionUI.forEach(el => el.style.display = 'none');
 
       // Wait to ensure styles are applied
       window.requestAnimationFrame(() => {
@@ -111,6 +117,7 @@ const main = async () => {
           if (response === 'page captured') {
             // Return to original view once page is captured.
             info.forEach((el, i) => el.style.display = displayState[i]);
+            extensionUI.forEach(el => el.style.display = '');
             openGallery();
           }
         });

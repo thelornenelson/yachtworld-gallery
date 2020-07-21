@@ -75,21 +75,6 @@ $sprites: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY0IiBoZWlnaHQ9Ijg4IiB2aWV
 	height: 44px;
 }
 
-@media (-webkit-min-device-pixel-ratio: 1.1),  (min-resolution: 105dpi), (min-resolution: 1.1dppx) {
-
-	/* Serve SVG sprite if browser supports SVG and resolution is more than 105dpi */
-    .pswp--svg .pswp__button,
-    .pswp--svg .pswp__button--arrow--left:before,
-	.pswp--svg .pswp__button--arrow--right:before {
-        background-image: url('#{$sprites}');
-    }
-
-    .pswp--svg .pswp__button--arrow--left,
-	.pswp--svg .pswp__button--arrow--right {
-		background: none;
-	}
-}
-
 .pswp__button--close {
 	background-position: 0 -44px;
 }
@@ -113,6 +98,14 @@ $sprites: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY0IiBoZWlnaHQ9Ijg4IiB2aWV
 .pswp__button--zoom {
 	display: none;
 	background-position: -88px 0;
+}
+
+.pswp__button--download {
+  background: transparent;
+  color: white;
+  width: auto;
+  margin-right: auto;
+  margin-left: 15px;
 }
 
 .pswp--zoom-allowed .pswp__button--zoom {
@@ -314,9 +307,6 @@ a.pswp__share--download {
  */
 
 .pswp__counter {
-	position: absolute;
-	left: 0;
-	top: 0;
 	height: 44px;
 	font-size: 13px;
 	line-height: 44px;
