@@ -22,11 +22,20 @@ export default function imageProbeFetch(url) {
           } else {
             result = Buffer.from(value);
           }
-          size = ImageProbe.fromBuffer(result)
-          if (size) {
-            controller.abort();
-            return;
+
+          try {
+            // ImageProbe attempts to read an offset value in the buffer
+            // If that offset is beyond the end of the buffer, an error
+            // is thrown.
+            size = ImageProbe.fromBuffer(result)
+            if (size) {
+              controller.abort();
+              return;
+            }
+          } catch (e) {
+            console.warn('Unable to determine image size, will keep trying', e);
           }
+
           // Otherwise continue reading stream
           return reader.read().then(process);
         })
