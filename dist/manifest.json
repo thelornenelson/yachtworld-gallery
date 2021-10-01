@@ -5,7 +5,7 @@
   "permissions": ["activeTab", "downloads", "pageCapture"],
   "content_scripts": [
     {
-      "matches": ["https://*.yachtworld.com/boats/*"],
+      "matches": ["https://*.yachtworld.com/*"],
       "css": ["content.css"],
       "js": ["content.js"]
     }

@@ -20,35 +20,40 @@ const launchButton = document.querySelector('[data-ywzg-gallery-open]');
 const downloadButton = document.querySelector('[data-ywzg-download-all]');
 
 const getImageUrls = () => {
-  return new Promise(resolve => {
-    // Thumbnails get loaded with data uris and image urls are lazy loaded
-    // Rather than adding a whole bunch of load listeners and risking timing issues,
-    // we just poll until all the urls have been populated.
-    const interval = setInterval(() => {
-      const thumbnails = document.querySelectorAll('.galleria-thumbnails .galleria-image img');
-      const urls = [...thumbnails].map(thumbnail => new URL(thumbnail.getAttribute('src')));
-      const nullOriginCount = urls.filter(({ origin }) => origin === 'null').length;
+  try {
+    // this should be something like `var __REDUX_STATE__=...`
+    const stateJS = Array.prototype.filter
+      .call(document.querySelectorAll('script'), a => a.innerHTML.includes('__REDUX_STATE__'))[0].innerHTML;
 
-      console.log(`Waiting on ${nullOriginCount} thumbnail urls to load`);
+    // We don't have access to the document's window object, so we can't get this state directly.
+    // Instead we have to parse the JS and return the value in our own context.
+    const getState = new Function(`${stateJS}; return __REDUX_STATE__;`);
 
-      if (thumbnails.length && nullOriginCount === 0) {
-          clearInterval(interval);
-          resolve(urls.map(url => `${url.origin}${url.pathname}`));
-        }
-      // For testing, just grab the first iteration.
-      // const validUrls = urls.filter(({ origin }) => origin !== 'null');
-      // if (validUrls.length) {
-      //   clearInterval(interval);
-      //   resolve(validUrls.map(url => `${url.origin}${url.pathname}`));
-      // }
-    }, 500);
-  })
+    const images = getState().app.data.media.filter(({ mediaType }) => mediaType === 'image');
+
+    // parse src as URL to ensure there are no query params
+    const urls = images
+      .map(image => image.url)
+      .map(urlString => new URL(urlString))
+      .map(url => `${url.origin}${url.pathname}`);
+
+    return urls;
+  } catch (e) {
+    console.log('Unable to find image urls', e);
+    return [];
+  }
 };
 
 const main = async () => {
   // This could be improved to launch the gallery as soon as we have the first image,
   // then dynamically add all other images as data is retrieved.
-  const imageUrls = await getImageUrls();
+  const imageUrls = getImageUrls();
+
+  if (!imageUrls.length) {
+    launchButton.style.display = 'none';
+    return;
+  }
+
   const imageSizes = await Promise.all(imageUrls.map(url => imageProbeFetch(url)));
 
   const items = imageUrls.map((url, i) => ({
@@ -102,9 +107,12 @@ const main = async () => {
     if (!gallery) return;
     gallery.listen('destroy', () => {
       // Show details and specs at once so it is all captured
-      const info = document.querySelectorAll('.boatdetails, .fullspecs');
-      const displayState = [...info].map(el => el.style.display);
-      info.forEach(el => el.style.display = 'block');
+      const info = document.querySelectorAll('.boat-details-content .collapse-content-details');
+      const displayState = [...info].map(el => el.classList.contains('open'));
+      info.forEach(el => {
+        el.classList.remove('closed');
+        el.classList.add('open');
+      });
 
       // Hide extension elements because injected stylesheets
       // are not included in page capture
@@ -116,7 +124,8 @@ const main = async () => {
         chrome.runtime.sendMessage({ downloadList: imageUrls }, response => {
           if (response === 'page captured') {
             // Return to original view once page is captured.
-            info.forEach((el, i) => el.style.display = displayState[i]);
+            info.forEach(el => el.classList.remove('open'));
+            info.forEach((el, i) => el.classList.add(displayState[i] ? 'open' : 'closed'));
             extensionUI.forEach(el => el.style.display = '');
             openGallery();
           }
