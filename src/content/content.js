@@ -19,40 +19,45 @@ document.body.insertAdjacentHTML('beforeend', galleryMarkup);
 const launchButton = document.querySelector('[data-ywzg-gallery-open]');
 const downloadButton = document.querySelector('[data-ywzg-download-all]');
 
-const getImageUrls = () => {
-  try {
-    // this should be something like `var __REDUX_STATE__=...`
-    const stateJS = Array.prototype.filter
-      .call(document.querySelectorAll('script'), a => a.innerHTML.includes('__REDUX_STATE__'))[0].innerHTML;
+const insertMessageScript = () => {
+  const scriptEl = document.createElement('script');
+  const script = "window.postMessage({ type: 'REDUX_STATE', state: __REDUX_STATE__ })";
+  scriptEl.appendChild(document.createTextNode(script));
+  document.body.append(scriptEl);
+}
 
-    // We don't have access to the document's window object, so we can't get this state directly.
-    // Instead we have to parse the JS and return the value in our own context.
-    const getState = new Function(`${stateJS}; return __REDUX_STATE__;`);
+const getImageUrls = new Promise(resolve => {
+  insertMessageScript();
 
-    const images = getState().app.data.media.filter(({ mediaType }) => mediaType === 'image');
+  window.addEventListener('message', e => {
+    if (e.source != window) return;
 
-    // parse src as URL to ensure there are no query params
-    const urls = images
-      .map(image => image.url)
-      .map(urlString => new URL(urlString))
-      .map(url => `${url.origin}${url.pathname}`);
+    if (e.data.type && e.data.type === 'REDUX_STATE') {
+      const state = e.data.state;
 
-    return urls;
-  } catch (e) {
-    console.log('Unable to find image urls', e);
-    return [];
-  }
-};
+      if (!state) resolve([]);
+
+      const images = state.app.data.media.filter(({ mediaType }) => mediaType === 'image');
+
+      // parse src as URL to ensure there are no query params
+      const urls = images
+        .map(image => image.url)
+        .map(urlString => new URL(urlString))
+        .map(url => `${url.origin}${url.pathname}`);
+
+      resolve(urls);
+    }
+  });
+});
 
 const main = async () => {
   // This could be improved to launch the gallery as soon as we have the first image,
   // then dynamically add all other images as data is retrieved.
-  const imageUrls = getImageUrls();
+  const imageUrls = await getImageUrls;
 
-  if (!imageUrls.length) {
-    launchButton.style.display = 'none';
-    return;
-  }
+  if (!imageUrls.length) return;
+
+  launchButton.style.display = 'block';
 
   const imageSizes = await Promise.all(imageUrls.map(url => imageProbeFetch(url)));
 
