@@ -5,7 +5,10 @@ A chrome extension to provide a better gallery experience on yachtworld.com
 ## Installation
 
 1. Download or clone this repo
-2. Load the unpacked extension by following [steps 1-3](https://developer.chrome.com/docs/extensions/mv2/getstarted/#manifest]) and loading the `/dist` directory.
-3. Visit any listings on yachtworld.com and you should have a new button to launch the gallery.
+1. Open Google Chrome
+1. Open the Extension Management page by navigating to chrome://extensions.
+1. Enable Developer Mode by clicking the toggle switch next to Developer mode.
+1. Click the LOAD UNPACKED button and select the extension directory (`/dist`).
+1. Visit any listings on yachtworld.com and you should have a new button to launch the gallery.
 
 !["Gallery launch button"](https://github.com/thelornenelson/yachtworld-gallery/blob/master/launcher.png)
