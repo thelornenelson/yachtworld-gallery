@@ -11,6 +11,7 @@ import PhotoSwipe from 'photoswipe';
 import PhotoSwipeUI from './components/photoswipe-ui';
 
 import imageProbeFetch from './components/imageProbeFetch';
+import SizeCache from './components/sizeCache';
 
 // Inject markup
 document.body.insertAdjacentHTML('beforeend', launcherMarkup);
@@ -59,7 +60,11 @@ const main = async () => {
 
   launchButton.style.display = 'block';
 
-  const imageSizes = await Promise.all(imageUrls.map(url => imageProbeFetch(url)));
+  const sizeCache = new SizeCache('yw-gallery-size-cache-v1');
+
+  const imageSizes = await Promise.all(imageUrls.map(url => imageProbeFetch(url, sizeCache)));
+
+  sizeCache.save();
 
   const items = imageUrls.map((url, i) => ({
     src: url,

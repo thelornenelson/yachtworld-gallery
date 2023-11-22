@@ -2,10 +2,15 @@ import { ImageProbe } from '@zerodeps/image-probe';
 
 import { Buffer } from 'buffer/';
 
-export default function imageProbeFetch(url) {
+export default function imageProbeFetch(url, cache) {
   const controller = new AbortController();
   const { signal } = controller;
 
+  const cachedSize = cache.get(url);
+
+  if (cachedSize) {
+    return Promise.resolve(cachedSize);
+  }
 
   return fetch(url, { signal })
     .then(response => {
@@ -39,6 +44,10 @@ export default function imageProbeFetch(url) {
           // Otherwise continue reading stream
           return reader.read().then(process);
         })
-        .then(() => size);
+        .then(() => {
+          cache.set(url, size);
+          console.log('size', size);
+          return size;
+        });
     });
 }

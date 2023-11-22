@@ -2,7 +2,7 @@
   "name": "Yacht Zoom Gallery",
   "version": "1.0",
   "description": "Provides a superior gallery experience for a popular yacht listing website",
-  "permissions": ["activeTab", "downloads", "pageCapture"],
+  "permissions": ["activeTab", "downloads", "pageCapture", "storage"],
   "content_scripts": [
     {
       "matches": ["https://*.yachtworld.com/*"],
