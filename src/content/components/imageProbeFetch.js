@@ -6,13 +6,19 @@ export default function imageProbeFetch(url, cache) {
   const controller = new AbortController();
   const { signal } = controller;
 
+  // For some reason images sometimes fail CORS if they have already been loaded
+  // so generate a unique URL. Seems to work??
+  const uniqueUrl = new URL(url);
+  const uuid = window.crypto.randomUUID();
+  uniqueUrl.searchParams.set(uuid, '');
+
   const cachedSize = cache.get(url);
 
   if (cachedSize) {
     return Promise.resolve(cachedSize);
   }
 
-  return fetch(url, { signal })
+  return fetch(uniqueUrl, { signal })
     .then(response => {
       const reader = response.body.getReader();
       let result = null;
