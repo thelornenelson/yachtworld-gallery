@@ -60,7 +60,7 @@ const main = async () => {
 
   launchButton.style.display = 'block';
 
-  const sizeCache = new SizeCache('yw-gallery-size-cache-v1');
+  const sizeCache = new SizeCache({ id: 'yw-gallery-size-cache-v1' });
 
   const imageSizes = await Promise.all(imageUrls.map(url => imageProbeFetch(url, sizeCache)));
 
@@ -68,8 +68,8 @@ const main = async () => {
 
   const items = imageUrls.map((url, i) => ({
     src: url,
-    w: imageSizes[i].width,
-    h: imageSizes[i].height,
+    w: imageSizes[i] ? imageSizes[i].width : 500,
+    h: imageSizes[i] ? imageSizes[i].height : 500,
     title: url,
   }));
 
@@ -85,7 +85,7 @@ const main = async () => {
     closeOnVerticalDrag: false,
     closeOnScroll: false,
     pinchToClose: false,
-    getDoubleTapZoom: (isMouseClick, item) =>  Math.min(1, item.initialZoomLevel * 2),
+    getDoubleTapZoom: (isMouseClick, item) => Math.min(1, item.initialZoomLevel * 2),
     isClickableElement: el => el.tagName === 'A' || el.classList.contains('pswp__zoom'),
     closeElClasses: [],
   };
